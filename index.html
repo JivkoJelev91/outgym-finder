@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OutGym Finder">
+<meta property="og:description" content="Find outdoor calisthenics spots near you, see their equipment and condition, train and earn XP.">
+<meta property="og:image" content="https://jivkojelev91.github.io/assets/sunset.jpg">
+<title>OutGym Finder</title>
+<meta name="description" content="Find outdoor calisthenics spots near you: pull-up bars, dips, rings and more. See the equipment and its condition, train, earn XP and add missing spots.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: one dark street-at-night scroll. Photo-led hero with a phone, then problem → answer,
+     features, a full-bleed photo band, three steps, contact. Tokens mirror the app's designSystem.json. */
+  :root {
+    --bg: #0b0b0f;
+    --bg-deep: #06070b;
+    --card: #15151a;
+    --card-up: #1e1e24;
+    --line: #27272a;
+    --fg: #ffffff;
+    --fg-2: #a7abb6;
+    --fg-3: #6b7280;
+    --lime: #a3ff12;
+    --lime-ink: #0b0b0f;
+    --lime-dim: rgba(163, 255, 18, 0.12);
+    --good: #22c55e;
+    --warn: #f59e0b;
+    --gold: #f2b42c;
+    --display: 'Oswald', 'Arial Narrow', Impact, sans-serif;
+    --body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --wrap: 1120px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 400 16px/1.6 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; border-radius: 6px; }
+
+  .wrap {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.005em; text-wrap: balance; margin: 0; }
+  h2 { font-size: clamp(32px, 5vw, 52px); line-height: 1.02; }
+  h3 { font-size: 22px; line-height: 1.15; font-weight: 600; }
+  p { margin: 0; }
+  .eyebrow {
+    font: 600 13px/1 var(--body);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lime);
+  }
+  .lead { color: var(--fg-2); font-size: 18px; max-width: 60ch; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px;
+    font: 700 15px/1 var(--body); text-decoration: none;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-lime { background: var(--lime); color: var(--lime-ink); }
+  .btn-lime:hover { background: #8ce60f; }
+  .btn-ghost { border: 1px solid var(--line); color: var(--fg); }
+  .btn-ghost:hover { border-color: var(--fg-3); }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+
+  /* Header */
+  header.top {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: rgba(11, 11, 15, 0.82);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(39, 39, 42, 0.7);
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+  .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand img { width: 36px; height: 36px; border-radius: 10px; }
+  .brand span { font: 700 20px/1 var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+  .brand b { color: var(--lime); font-weight: 700; }
+  .top nav { display: flex; align-items: center; gap: 24px; }
+  .top nav a.link { text-decoration: none; color: var(--fg-2); font-weight: 600; font-size: 14px; }
+  .top nav a.link:hover { color: var(--fg); }
+  .top .btn { padding: 10px 16px; font-size: 14px; }
+
+  /* Hero */
+  .hero { position: relative; overflow: hidden; isolation: isolate; }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(90deg, var(--bg) 0%, rgba(11,11,15,.92) 38%, rgba(11,11,15,.45) 70%, rgba(11,11,15,.75) 100%),
+      linear-gradient(0deg, var(--bg) 0%, rgba(11,11,15,0) 30%),
+      url("assets/pull-up.jpg") right 18% center / cover no-repeat;
+  }
+  .hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; padding-block: 72px 88px; }
+  .hero-copy { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  .hero h1 { font-size: clamp(48px, 8.4vw, 104px); line-height: 0.92; letter-spacing: -0.005em; }
+  .hero h1 em { font-style: normal; color: var(--lime); }
+  .hero .lead { font-size: 19px; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .hero-facts { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--fg-2); font-size: 14px; font-weight: 600; }
+  .hero-facts span { display: inline-flex; align-items: center; gap: 8px; }
+  .hero-facts span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+
+  /* Phone mockups */
+  .phone {
+    width: 300px; max-width: 100%;
+    border-radius: 40px; padding: 10px;
+    background: #1a1a1f;
+    box-shadow: 0 0 0 1px #2e2e35, 0 40px 80px -20px rgba(0,0,0,.8), 0 0 90px -30px rgba(163,255,18,.35);
+  }
+  .screen { border-radius: 31px; overflow: hidden; background: var(--bg); position: relative; }
+  .hero .phone { justify-self: center; transform: rotate(2.5deg); }
+  .notch { position: absolute; top: 9px; left: 50%; width: 84px; height: 22px; margin-left: -42px; border-radius: 12px; background: #000; z-index: 2; }
+  .shot-photo { height: 210px; background: url("assets/pull-up.jpg") center 30% / cover; position: relative; }
+  .shot-photo .dist {
+    position: absolute; left: 12px; bottom: 12px;
+    background: var(--lime); color: var(--lime-ink);
+    font: 700 12px/1 var(--body); padding: 7px 10px; border-radius: 999px;
+  }
+  .shot-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .shot-title { font: 700 21px/1.1 var(--display); text-transform: uppercase; }
+  .shot-meta { display: flex; align-items: center; gap: 10px; color: var(--fg-2); font-size: 12px; font-weight: 600; }
+  .stars { color: var(--gold); letter-spacing: 1px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: 600 11px/1 var(--body); padding: 7px 9px; border-radius: 999px;
+    background: var(--card-up); color: var(--fg); border: 1px solid var(--line);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+  .chip i.worn { background: var(--warn); }
+  .shot-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+  .shot-row small { display: block; color: var(--fg-3); font-size: 11px; font-weight: 600; }
+  .shot-row strong { font-size: 13px; }
+  .crown { color: var(--gold); font-size: 18px; }
+  .shot-btn { text-align: center; background: var(--lime); color: var(--lime-ink); font: 700 14px/1 var(--display); text-transform: uppercase; letter-spacing: .04em; padding: 13px; border-radius: 14px; }
+
+  /* Problem → answer */
+  section { padding-block: 96px; }
+  .section-head { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+  .problems { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line); }
+  .problem { padding: 28px 28px 8px 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .problem + .problem { padding-left: 28px; border-left: 1px solid var(--line); }
+  .problem .q { font: 600 13px/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-3); }
+  .problem h3 { font-size: 26px; }
+  .problem p { color: var(--fg-2); }
+  .problem .a { color: var(--fg); font-weight: 600; display: flex; gap: 10px; }
+  .problem .a::before { content: "→"; color: var(--lime); font-weight: 700; }
+
+  /* Features */
+  .features { background: var(--bg-deep); border-block: 1px solid var(--line); }
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+    padding: 26px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  }
+  .feat .ico { width: 44px; height: 44px; border-radius: 13px; background: var(--lime-dim); color: var(--lime); display: grid; place-items: center; }
+  .feat .ico svg { width: 22px; height: 22px; }
+  .feat p { color: var(--fg-2); font-size: 15px; }
+
+  .equip { margin-top: 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .equip .label { font: 600 13px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-3); margin-right: 6px; }
+  .equip span.tag { font: 600 14px/1 var(--body); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); }
+
+  /* Progress split */
+  .split { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 64px; align-items: center; }
+  .split .phone { justify-self: center; transform: rotate(-2deg); }
+  .split-copy { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .ticks { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .ticks li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; color: var(--fg-2); }
+  .ticks li strong { color: var(--fg); display: block; }
+  .ticks li::before {
+    content: ""; width: 22px; height: 22px; margin-top: 2px; border-radius: 50%;
+    background: var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b0b0f' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+
+  .prof-head { padding: 44px 16px 18px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(180deg, #16210a 0%, var(--bg) 100%); }
+  .lvl { display: flex; align-items: center; gap: 12px; }
+  .lvl-badge { width: 52px; height: 52px; border-radius: 16px; background: var(--lime); color: var(--lime-ink); display: grid; place-items: center; font: 700 24px/1 var(--display); }
+  .lvl small { color: var(--fg-2); font-size: 11px; font-weight: 600; display: block; }
+  .lvl strong { font: 700 20px/1.1 var(--display); text-transform: uppercase; }
+  .bar { height: 8px; border-radius: 99px; background: var(--card-up); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 68%; background: var(--lime); border-radius: 99px; }
+  .bar-cap { display: flex; justify-content: space-between; font-size: 11px; color: var(--fg-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; }
+  .stat b { display: block; font: 700 20px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .stat small { color: var(--fg-3); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .board { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+  .board h4 { margin: 0 0 4px; font: 600 13px/1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--fg-2); }
+  .rank { display: grid; grid-template-columns: 22px 28px 1fr auto; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--card); font-size: 12px; font-weight: 600; }
+  .rank.me { background: var(--lime-dim); border: 1px solid rgba(163,255,18,.35); }
+  .rank .n { color: var(--fg-3); font-variant-numeric: tabular-nums; }
+  .rank .av { width: 28px; height: 28px; border-radius: 50%; background: var(--card-up); display: grid; place-items: center; font-size: 11px; color: var(--fg-2); }
+  .rank.me .av { background: var(--lime); color: var(--lime-ink); }
+  .rank .xp { color: var(--fg-2); font-variant-numeric: tabular-nums; }
+
+  /* Photo band */
+  .band { position: relative; padding-block: 140px; isolation: isolate; overflow: hidden; }
+  .band::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(180deg, var(--bg) 0%, rgba(11,11,15,.35) 30%, rgba(11,11,15,.35) 70%, var(--bg) 100%),
+      url("assets/sunset.jpg") center 52% / cover no-repeat;
+  }
+  .band blockquote { margin: 0; max-width: 16ch; font: 700 clamp(40px, 7vw, 84px)/0.98 var(--display); text-transform: uppercase; text-wrap: balance; }
+  .band blockquote em { font-style: normal; color: var(--lime); }
+  .band p { margin-top: 18px; color: var(--fg); font-weight: 600; max-width: 46ch; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
+  .step { display: flex; flex-direction: column; gap: 12px; padding-top: 22px; border-top: 2px solid var(--line); counter-increment: step; min-width: 0; }
+  .step::before { content: counter(step, decimal-leading-zero); font: 700 46px/1 var(--display); color: var(--lime); }
+  .step p { color: var(--fg-2); }
+
+  /* Contact */
+  .contact { background: var(--bg-deep); border-top: 1px solid var(--line); }
+  .contact-card {
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 48px;
+    position: relative; overflow: hidden;
+  }
+  .contact-card::after {
+    content: ""; position: absolute; right: -120px; top: -120px; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(163,255,18,.18), rgba(163,255,18,0) 70%); pointer-events: none;
+  }
+  .contact-copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .contact-list { display: flex; flex-direction: column; gap: 12px; min-width: 0; position: relative; z-index: 1; }
+  .c-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 18px; background: var(--card-up); border: 1px solid var(--line); text-decoration: none; min-width: 0; }
+  .c-item .ico { width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--lime-dim); color: var(--lime); display: grid; place-items: center; }
+  .c-item .ico svg { width: 20px; height: 20px; }
+  .c-item div { min-width: 0; flex: 1; }
+  .c-item small { display: block; color: var(--fg-3); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+  .c-item strong { display: block; font-size: 15px; overflow-wrap: anywhere; user-select: all; }
+  .copy-btn { flex: none; background: none; border: 1px solid var(--line); color: var(--fg-2); font: 600 12px/1 var(--body); padding: 8px 10px; border-radius: 999px; cursor: pointer; }
+  .copy-btn:hover { color: var(--fg); border-color: var(--fg-3); }
+
+  footer { padding-block: 32px; border-top: 1px solid var(--line); background: var(--bg-deep); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; color: var(--fg-3); font-size: 13px; }
+  footer a { color: var(--fg-2); text-decoration: none; }
+  footer a:hover { color: var(--fg); }
+  footer .links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  /* Entrance: elements are visible at rest; motion only adds a lift. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy > * { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+    .hero-copy > *:nth-child(2) { animation-delay: .06s; }
+    .hero-copy > *:nth-child(3) { animation-delay: .12s; }
+    .hero-copy > *:nth-child(4) { animation-delay: .18s; }
+    .hero-copy > *:nth-child(5) { animation-delay: .24s; }
+    .hero .phone { animation: phone-in .9s .15s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes rise { from { transform: translateY(14px); } to { transform: none; } }
+    @keyframes phone-in { from { transform: translateY(24px) rotate(6deg); } to { transform: rotate(2.5deg); } }
+  }
+
+  @media (max-width: 920px) {
+    .hero .wrap { grid-template-columns: 1fr; padding-block: 48px 64px; }
+    .hero-bg { background:
+      linear-gradient(180deg, rgba(11,11,15,.7) 0%, rgba(11,11,15,.88) 45%, var(--bg) 100%),
+      url("assets/pull-up.jpg") center 20% / cover no-repeat; }
+    .problems, .feat-grid, .steps { grid-template-columns: 1fr 1fr; }
+    .problem + .problem { padding-left: 0; border-left: 0; }
+    .problem { padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+    .problems { gap: 0 28px; }
+    .split { grid-template-columns: 1fr; gap: 48px; }
+    .split .phone { order: 2; }
+    .contact-card { grid-template-columns: 1fr; padding: 32px; }
+    .top nav a.link { display: none; }
+  }
+  @media (max-width: 600px) {
+    section { padding-block: 72px; }
+    .problems, .feat-grid, .steps { grid-template-columns: 1fr; }
+    .band { padding-block: 100px; }
+    .contact-card { padding: 24px; border-radius: 22px; }
+    .top .btn span.long { display: none; }
+    .hero .lead { font-size: 17px; }
+  }
+</style>
+<style>
+  .lang { position: relative; display: inline-flex; align-items: center; }
+  .lang svg { position: absolute; left: 11px; width: 16px; height: 16px; color: var(--fg-2); pointer-events: none; }
+  .lang svg.chev { left: auto; right: 10px; width: 12px; height: 12px; }
+  .lang select {
+    appearance: none; -webkit-appearance: none;
+    background: var(--bg); border: 1px solid var(--line); color: var(--fg);
+    font: 600 14px/1 var(--body);
+    padding: 10px 30px 10px 34px; border-radius: 999px; cursor: pointer;
+  }
+  .lang select:hover { border-color: var(--fg-3); }
+  .lang select option { background: var(--card); color: var(--fg); }
+  /* Workout calendar: mirrors the app's WorkoutCalendar (gradient discs, streak capsules). */
+  .cal-section { background: var(--bg-deep); border-block: 1px solid var(--line); }
+  .split.rev { grid-template-columns: 1.15fr 0.85fr; }
+  .cal-card {
+    justify-self: center; width: 360px; max-width: 100%;
+    background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 18px;
+    display: flex; flex-direction: column; gap: 16px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.8), 0 0 90px -30px rgba(163,255,18,.3);
+    transform: rotate(1.5deg);
+  }
+  .grad { background: linear-gradient(135deg, #d4ff8a 0%, #a3ff12 50%, #2dd4bf 100%); }
+  .cal-hero { display: flex; align-items: center; justify-content: space-between; border-radius: 18px; padding: 16px; color: var(--lime-ink); }
+  .cal-hero .left { display: flex; align-items: center; gap: 10px; }
+  .cal-hero svg { width: 30px; height: 30px; }
+  .cal-hero b { display: block; font: 700 30px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .cal-hero small { display: block; font: 700 11px/1.2 var(--body); text-transform: uppercase; letter-spacing: .06em; }
+  .cal-hero .right { text-align: right; }
+  .cal-month { display: flex; align-items: center; justify-content: space-between; }
+  .cal-month strong { font: 600 18px/1 var(--display); text-transform: uppercase; letter-spacing: .04em; }
+  .cal-arrow { width: 32px; height: 32px; border-radius: 50%; background: var(--card-up); display: grid; place-items: center; color: var(--fg); }
+  .cal-arrow svg { width: 14px; height: 14px; }
+  .cal-arrow.off { opacity: .3; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
+  .cal-wd { text-align: center; font: 700 11px/1 var(--body); color: var(--fg-3); padding-bottom: 8px; }
+  .day { position: relative; aspect-ratio: 1; display: grid; place-items: center; }
+  .day .join { position: absolute; top: 4px; bottom: 4px; background: var(--lime); opacity: .25; }
+  .day .join.l { left: 0; right: 50%; }
+  .day .join.r { left: 50%; right: 0; }
+  .day span { position: relative; width: calc(100% - 4px); height: calc(100% - 4px); border-radius: 50%; display: grid; place-items: center; font: 500 13px/1 var(--body); color: var(--fg); font-variant-numeric: tabular-nums; }
+  .day.on span { color: var(--lime-ink); font-weight: 700; }
+  .day.future span { color: var(--fg-3); opacity: .6; }
+  .cal-progress { display: flex; flex-direction: column; gap: 8px; }
+  .cal-progress .bar i { width: 63%; }
+  .cal-progress p { font-size: 12px; font-weight: 600; color: var(--fg-2); }
+  @media (max-width: 920px) {
+    .split.rev { grid-template-columns: 1fr; }
+    .split .cal-card { order: 2; }
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (max-width: 920px) { .top nav { gap: 10px; } }
+  @media (max-width: 440px) {
+    .top .wrap { gap: 8px; }
+    .brand span { font-size: 16px; }
+    .brand img { width: 30px; height: 30px; }
+    .lang select { padding: 9px 26px 9px 30px; font-size: 13px; }
+    .lang svg { left: 9px; }
+    .lang svg.chev { right: 8px; }
+  }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="OutGym Finder home">
+      <img src="assets/icon.png" alt="" width="36" height="36">
+      <span data-i18n="brand">OutGym <b>Finder</b></span>
+    </a>
+    <nav aria-label="Main">
+      <a class="link" href="#why" data-i18n="nav.why">Why</a>
+      <a class="link" href="#features" data-i18n="nav.features">Features</a>
+      <a class="link" href="#how" data-i18n="nav.how">How it works</a>
+      <a class="link" href="#contact" data-i18n="nav.contact">Contact</a>
+      <div class="lang">
+        <label class="sr-only" for="lang-select" data-i18n="nav.language">Language</label>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="bg">Български</option>
+        </select>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <a class="btn btn-lime" href="https://play.google.com/store/apps/details?id=com.outgym.finder" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.2c-.3.3-.4.7-.4 1.2v17.2c0 .5.1.9.4 1.2l9.6-9.8-9.6-9.8zm10.6 10.8 2.7 2.7-11.3 6.5 8.6-9.2zm0-2L5.6 1.8l11.3 6.5-2.7 2.7zm6.7-1.4c.8.5.8 1.8 0 2.3l-2.8 1.6-3-3 3-3 2.8 2.1z"/></svg>
+        <span class="long" data-i18n="nav.getApp">Get the app</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" style="padding-block:0">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1 data-i18n="hero.title">Find a bar.<br><em>Train outside.</em></h1>
+        <p class="lead" data-i18n="hero.lead">OutGym Finder shows you the street workout spots around you: pull-up bars, dip stations, rings and monkey bars in parks and courtyards. See what equipment each spot has and what shape it is in before you walk there.</p>
+        <div class="hero-cta">
+          <a class="btn btn-lime" href="https://play.google.com/store/apps/details?id=com.outgym.finder" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.2c-.3.3-.4.7-.4 1.2v17.2c0 .5.1.9.4 1.2l9.6-9.8-9.6-9.8zm10.6 10.8 2.7 2.7-11.3 6.5 8.6-9.2zm0-2L5.6 1.8l11.3 6.5-2.7 2.7zm6.7-1.4c.8.5.8 1.8 0 2.3l-2.8 1.6-3-3 3-3 2.8 2.1z"/></svg>
+            <span data-i18n="cta.play">Get it on Google Play</span>
+          </a>
+          <a class="btn btn-ghost" href="#why" data-i18n="cta.why">Why OutGym</a>
+        </div>
+        <div class="hero-facts">
+          <span data-i18n="fact.free">Free to use</span>
+          <span data-i18n="fact.community">Built by the community</span>        </div>
+      </div>
+
+      <div class="phone" aria-label="Spot screen in the app">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="shot-photo"><span class="dist" data-i18n="spot.dist">350 m away</span></div>
+          <div class="shot-body">
+            <div class="shot-title" data-i18n="spot.name">Park outdoor gym</div>
+            <div class="shot-meta"><span class="stars">★★★★★</span><span data-i18n="spot.reviews">4.8 · 23 reviews</span></div>
+            <div class="chips">
+              <span class="chip"><i></i><span data-i18n="spot.pullups">Pull-ups ×4</span></span>
+              <span class="chip"><i></i><span data-i18n="spot.dips">Dips ×2</span></span>
+              <span class="chip"><i class="worn"></i><span data-i18n="eq.rings">Rings</span></span>
+              <span class="chip"><i></i><span data-i18n="eq.monkey">Monkey bars</span></span>
+            </div>
+            <div class="shot-row">
+              <div><small data-i18n="spot.king">King of the spot</small><strong data-i18n="spot.kingDays">31 training days here</strong></div>
+              <span class="crown" aria-hidden="true">♛</span>
+            </div>
+            <div class="shot-btn" data-i18n="spot.train">Train here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="why.eyebrow">The problem it solves</p>
+        <h2 data-i18n="why.title">Free gyms are everywhere.<br>Finding a good one isn't.</h2>
+        <p class="lead" data-i18n="why.lead">Cities are full of outdoor bars, but nobody keeps a list of them. Regular maps don't show them, and when they do, they can't tell you whether the bars are still standing.</p>
+      </div>
+      <div class="problems">
+        <article class="problem">
+          <p class="q" data-i18n="p1.q">“Where can I train near here?”</p>
+          <h3 data-i18n="p1.title">Spots are hard to find</h3>
+          <p data-i18n="p1.body">Outdoor gyms hide in parks, schoolyards and between blocks. You only know the ones you happen to walk past.</p>
+          <p class="a" data-i18n="p1.answer">A map and a list of spots, sorted by distance from you.</p>
+        </article>
+        <article class="problem">
+          <p class="q" data-i18n="p2.q">“Is it worth the walk?”</p>
+          <h3 data-i18n="p2.title">You don't know what's there</h3>
+          <p data-i18n="p2.body">A pin on a map says nothing about the equipment. You arrive and find one low bar, or broken rings.</p>
+          <p class="a" data-i18n="p2.answer">Each spot lists its equipment, how many, condition and photos.</p>
+        </article>
+        <article class="problem">
+          <p class="q" data-i18n="p3.q">“Why keep going?”</p>
+          <h3 data-i18n="p3.title">Training alone fades</h3>
+          <p data-i18n="p3.body">Without a coach or a gym membership, it's easy to skip a day, then a week.</p>
+          <p class="a" data-i18n="p3.answer">XP, levels, daily streaks and a leaderboard to keep you showing up.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="feat.eyebrow">What's inside</p>
+        <h2 data-i18n="feat.title">Everything a street athlete needs</h2>
+      </div>
+      <div class="feat-grid">
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+          <h3 data-i18n="f1.title">Map and list</h3>
+          <p data-i18n="f1.body">Browse spots on a map or as a list with the nearest first. Filter by the equipment you need today.</p>
+        </article>
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5M20 21V5M4 7h16"/></svg></div>
+          <h3 data-i18n="f2.title">Real spot details</h3>
+          <p data-i18n="f2.body">Equipment, quantity and condition (good, worn or damaged), plus photos from people who trained there.</p>
+        </article>
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></div>
+          <h3 data-i18n="f3.title">Ratings and reviews</h3>
+          <p data-i18n="f3.body">Rate the spots you've trained at and read what others thought before you go.</p>
+        </article>
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div>
+          <h3 data-i18n="f4.title">Add a missing spot</h3>
+          <p data-i18n="f4.body">Standing at a spot that isn't listed? Add it with your location and a photo in under a minute, and earn XP for it.</p>
+        </article>
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <h3 data-i18n="f5.title">Train and level up</h3>
+          <p data-i18n="f5.body">Start a workout at a spot, keep your daily streak alive, unlock achievements and climb the leaderboard.</p>
+        </article>
+        <article class="feat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18h18l-2-10-5 4-2-6-2 6-5-4z"/></svg></div>
+          <h3 data-i18n="f6.title">King of the spot</h3>
+          <p data-i18n="f6.body">Train at a spot on more days than anyone else and take its crown. Someone passes you, you get notified.</p>
+        </article>
+      </div>
+      <div class="equip" aria-label="Equipment the app tracks">
+        <span class="label" data-i18n="eq.label">Equipment we track</span>
+        <span class="tag" data-i18n="eq.pullup">Pull-up bars</span>
+        <span class="tag" data-i18n="eq.dips">Dips</span>
+        <span class="tag" data-i18n="eq.rings">Rings</span>
+        <span class="tag" data-i18n="eq.monkey">Monkey bars</span>
+        <span class="tag" data-i18n="eq.ladder">Ladder</span>
+        <span class="tag" data-i18n="eq.bench">Sit-up bench</span>
+        <span class="tag" data-i18n="eq.pushup">Push-up bars</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div class="phone" aria-label="Progress screen in the app">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="prof-head">
+            <div class="lvl">
+              <div class="lvl-badge">12</div>
+              <div><small data-i18n="prog.level">Level 12</small><strong data-i18n="prog.rank">Bar Regular</strong></div>
+            </div>
+            <div class="bar"><i></i></div>
+            <div class="bar-cap"><span>2,040 XP</span><span>3,000 XP</span></div>
+          </div>
+          <div class="stats3">
+            <div class="stat"><b>9</b><small data-i18n="prog.streak">Day streak</small></div>
+            <div class="stat"><b>47</b><small data-i18n="prog.workouts">Workouts</small></div>
+            <div class="stat"><b>2</b><small data-i18n="prog.crowns">Crowns</small></div>
+          </div>
+          <div class="board">
+            <h4 data-i18n="prog.board">Leaderboard</h4>
+            <div class="rank"><span class="n">1</span><span class="av">MK</span><span>Martin K.</span><span class="xp">4,310</span></div>
+            <div class="rank"><span class="n">2</span><span class="av">EP</span><span>Elena P.</span><span class="xp">3,875</span></div>
+            <div class="rank me"><span class="n">3</span><span class="av" data-i18n="prog.youShort">YOU</span><span data-i18n="prog.you">You</span><span class="xp">2,040</span></div>
+            <div class="rank"><span class="n">4</span><span class="av">DS</span><span>Dimitar S.</span><span class="xp">1,920</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="split-copy">
+        <p class="eyebrow" data-i18n="stay.eyebrow">Stay consistent</p>
+        <h2 data-i18n="stay.title">Every session counts</h2>
+        <p class="lead" data-i18n="stay.lead">Outdoor training has no membership card pushing you to show up. OutGym gives you a reason to come back tomorrow.</p>
+        <ul class="ticks">
+          <li><div data-i18n="stay.t1"><strong>XP for what you do</strong>Workouts, new spots, photos and reviews all earn XP and move you up a level.</div></li>
+          <li><div data-i18n="stay.t2"><strong>Daily streak</strong>A gentle reminder in the middle of the day keeps the streak from slipping.</div></li>
+          <li><div data-i18n="stay.t3"><strong>Achievements and crowns</strong>Collect badges and defend your spots against other athletes.</div></li>
+          <li><div data-i18n="stay.t4"><strong>Share your workout</strong>Post a finished workout card to your friends in one tap.</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="cal-section">
+    <div class="wrap split rev">
+      <div class="split-copy">
+        <p class="eyebrow" data-i18n="cal.eyebrow">Workout calendar</p>
+        <h2 data-i18n="cal.title">Your month at a glance</h2>
+        <p class="lead" data-i18n="cal.lead">Every day you train lights up on the calendar. Days in a row join into one streak, so you see your rhythm and the gaps in it.</p>
+        <ul class="ticks">
+          <li><div data-i18n="cal.t1"><strong>Streak and monthly total</strong>Days in a row and this month's workouts sit right at the top.</div></li>
+          <li><div data-i18n="cal.t2"><strong>Days with a workout</strong>A bar shows on how many days of the month you trained.</div></li>
+          <li><div data-i18n="cal.t3"><strong>Only real workouts count</strong>Skip more than half of the sets and the day stays empty, so the calendar shows what you actually did.</div></li>
+          <li><div data-i18n="cal.t4"><strong>Earlier months</strong>Flip back through past months and see how far you've come.</div></li>
+        </ul>
+      </div>
+      <div class="cal-card" aria-label="Workout calendar in the app">
+        <div class="cal-hero grad">
+          <div class="left">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 1.5s.9 3-1.2 5.6C10.6 9.2 8 10.8 8 14.4a4.6 4.6 0 0 0 2.2 3.9c-.3-1.6.4-3.2 1.8-4.3.3 1.7 1.6 2.5 2.4 3.6.5.7.7 1.4.6 2.1A6.8 6.8 0 0 0 19 13.5c0-5.4-5.5-7.3-5.5-12zM12 22.5a7.5 7.5 0 0 1-7.5-7.5c0-3.4 1.9-5.4 3.5-7 .2 1.9 1 3.1 2 3.9"/></svg>
+            <div><b>9</b><small data-i18n="cal.streak">Days in a row</small></div>
+          </div>
+          <div class="right"><b>21</b><small data-i18n="cal.thisMonth">This month</small></div>
+        </div>
+        <div class="cal-month">
+          <span class="cal-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>
+          <strong data-i18n="cal.month">October</strong>
+          <span class="cal-arrow off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+        </div>
+        <div class="cal-grid" id="cal-grid">
+          <span class="cal-wd" data-i18n="cal.mon">M</span>
+          <span class="cal-wd" data-i18n="cal.tue">T</span>
+          <span class="cal-wd" data-i18n="cal.wed">W</span>
+          <span class="cal-wd" data-i18n="cal.thu">T</span>
+          <span class="cal-wd" data-i18n="cal.fri">F</span>
+          <span class="cal-wd" data-i18n="cal.sat">S</span>
+          <span class="cal-wd" data-i18n="cal.sun">S</span>
+        </div>
+        <div class="cal-progress">
+          <div class="bar"><i></i></div>
+          <p data-i18n="cal.progress">19 of 30 days with a workout</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="band">
+    <div class="wrap">
+      <blockquote data-i18n="band.quote">No membership. <em>No opening hours.</em></blockquote>
+      <p data-i18n="band.body">The bars are already out there. OutGym Finder helps you find them, and helps the next person find them too.</p>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+        <h2 data-i18n="how.title">From couch to bar in three steps</h2>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <h3 data-i18n="s1.title">Open the map</h3>
+          <p data-i18n="s1.body">Allow location and the nearest spots appear first. Location is used only while the app is open.</p>
+        </article>
+        <article class="step">
+          <h3 data-i18n="s2.title">Pick your spot</h3>
+          <p data-i18n="s2.body">Check the equipment, its condition, photos and reviews, then get directions.</p>
+        </article>
+        <article class="step">
+          <h3 data-i18n="s3.title">Train and earn</h3>
+          <p data-i18n="s3.body">Tap “Train here”, finish your session and collect XP. Rate the spot on your way out.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <div class="contact-card">
+        <div class="contact-copy">
+          <p class="eyebrow" data-i18n="contact.eyebrow">Get in touch</p>
+          <h2 data-i18n="contact.title">Questions, ideas or a spot we got wrong?</h2>
+          <p class="lead" data-i18n="contact.lead">Write to us. Feedback from athletes shapes what we build next. Requests about your data are welcome here too; you can also delete your account at any time from Settings in the app.</p>
+        </div>
+        <div class="contact-list">
+          <div class="c-item">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+            <div><small data-i18n="contact.email">Email</small><strong id="email">support.street.workout.nearby@gmail.com</strong></div>
+            <button class="copy-btn" id="copy-email" type="button" data-i18n="contact.copy">Copy</button>
+          </div>
+          <a class="c-item" href="https://play.google.com/store/apps/details?id=com.outgym.finder" target="_blank" rel="noopener">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.2c-.3.3-.4.7-.4 1.2v17.2c0 .5.1.9.4 1.2l9.6-9.8-9.6-9.8zm10.6 10.8 2.7 2.7-11.3 6.5 8.6-9.2zm0-2L5.6 1.8l11.3 6.5-2.7 2.7zm6.7-1.4c.8.5.8 1.8 0 2.3l-2.8 1.6-3-3 3-3 2.8 2.1z"/></svg></span>
+            <div><small>Google Play</small><strong data-i18n="contact.android">OutGym Finder for Android</strong></div>
+          </a>
+          <a class="c-item" href="https://github.com/JivkoJelev91" target="_blank" rel="noopener">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span>
+            <div><small data-i18n="contact.dev">Developer</small><strong data-i18n="contact.devName">Zhivko Zhelev</strong></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="footer.copy">© 2026 OutGym Finder · Made in Bulgaria</span>
+    <div class="links">
+      <a href="#why" data-i18n="nav.why">Why</a>
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+      <a href="/app-ads.txt">app-ads.txt</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // English is the page's own text; Bulgarian replaces it for visitors from Bulgaria.
+    // To add a language: add an <option> to #lang-select and its dictionary here.
+    var BG = {
+      'brand': 'Лостове <b>наблизо</b>',
+      'nav.language': 'Език',
+      'nav.why': 'Защо',
+      'nav.features': 'Функции',
+      'nav.how': 'Как работи',
+      'nav.contact': 'Контакти',
+      'nav.getApp': 'Изтегли',
+      'hero.title': 'Намери лост.<br><em>Тренирай навън.</em>',
+      'hero.lead': '„Лостове наблизо“ ти показва местата за уличен фитнес около теб: лостове, успоредки, халки и маймунки в паркове и между блоковете. Виж какви уреди има всяко място и в какво състояние са, преди да тръгнеш натам.',
+      'cta.play': 'Изтегли от Google Play',
+      'cta.why': 'Защо „Лостове наблизо“',
+      'fact.free': 'Безплатно',
+      'fact.community': 'Създадено от общността',
+      'spot.dist': 'на 350 м',
+      'spot.name': 'Фитнес в парка',
+      'spot.reviews': '4.8 · 23 отзива',
+      'spot.pullups': 'Набиране ×4',
+      'spot.dips': 'Успоредка ×2',
+      'spot.king': 'Крал на мястото',
+      'spot.kingDays': '31 тренировъчни дни тук',
+      'spot.train': 'Тренирай тук',
+      'why.eyebrow': 'Какъв проблем решава',
+      'why.title': 'Безплатни фитнеси има навсякъде.<br>Добрият е трудно откриваем.',
+      'why.lead': 'Градовете са пълни с лостове на открито, но никой не води списък с тях. Обикновените карти не ги показват, а когато ги показват, не казват дали уредите още са там.',
+      'p1.q': '„Къде да тренирам наблизо?“',
+      'p1.title': 'Местата са трудни за намиране',
+      'p1.body': 'Уличните фитнеси се крият в паркове, училищни дворове и между блоковете. Знаеш само тези, покрай които случайно минаваш.',
+      'p1.answer': 'Карта и списък с места, подредени по разстояние от теб.',
+      'p2.q': '„Струва ли си да отида?“',
+      'p2.title': 'Не знаеш какво има там',
+      'p2.body': 'Точка на картата не казва нищо за уредите. Стигаш и намираш един нисък лост или скъсани халки.',
+      'p2.answer': 'Всяко място показва уредите, броя им, състоянието и снимки.',
+      'p3.q': '„Защо да продължавам?“',
+      'p3.title': 'Сам бързо се отказваш',
+      'p3.body': 'Без треньор и без карта за фитнес е лесно да пропуснеш ден, после седмица.',
+      'p3.answer': 'XP, нива, дневна серия и класация, които те карат да се връщаш.',
+      'feat.eyebrow': 'Какво има вътре',
+      'feat.title': 'Всичко, от което има нужда уличният атлет',
+      'f1.title': 'Карта и списък',
+      'f1.body': 'Разглеждай местата на картата или в списък с най-близките първи. Филтрирай по уредите, които ти трябват днес.',
+      'f2.title': 'Реална информация',
+      'f2.body': 'Уреди, брой и състояние (добро, износено или повредено), плюс снимки от хора, тренирали там.',
+      'f3.title': 'Оценки и отзиви',
+      'f3.body': 'Оценявай местата, на които си тренирал, и виж какво мислят другите, преди да тръгнеш.',
+      'f4.title': 'Добави липсващо място',
+      'f4.body': 'Стоиш на място, което го няма в приложението? Добави го с локацията си и снимка за по-малко от минута и спечели XP.',
+      'f5.title': 'Тренирай и качвай нива',
+      'f5.body': 'Започни тренировка на място, пази дневната си серия, отключвай постижения и се изкачвай в класацията.',
+      'f6.title': 'Крал на мястото',
+      'f6.body': 'Тренирай на едно място в повече дни от всички останали и вземи короната му. Ако някой те изпревари, получаваш известие.',
+      'eq.label': 'Уреди, които следим',
+      'eq.pullup': 'Лост за набиране',
+      'eq.dips': 'Успоредка',
+      'eq.rings': 'Халки',
+      'eq.monkey': 'Маймунки',
+      'eq.ladder': 'Стълба',
+      'eq.bench': 'Коремна пейка',
+      'eq.pushup': 'Опора за лицеви',
+      'prog.level': 'Ниво 12',
+      'prog.rank': 'Редовен на лоста',
+      'prog.streak': 'Дни серия',
+      'prog.workouts': 'Тренировки',
+      'prog.crowns': 'Корони',
+      'prog.board': 'Класация',
+      'prog.youShort': 'ТИ',
+      'prog.you': 'Ти',
+      'stay.eyebrow': 'Бъди постоянен',
+      'stay.title': 'Всяка тренировка се брои',
+      'stay.lead': 'Навън няма абонамент, който да те кара да ходиш. „Лостове наблизо“ ти дава причина да се върнеш и утре.',
+      'stay.t1': '<strong>XP за всичко, което правиш</strong>Тренировки, нови места, снимки и отзиви носят XP и те качват ниво.',
+      'stay.t2': '<strong>Дневна серия</strong>Кратко напомняне по обяд пази серията ти да не прекъсне.',
+      'stay.t3': '<strong>Постижения и корони</strong>Събирай значки и пази местата си от другите атлети.',
+      'stay.t4': '<strong>Сподели тренировката</strong>Изпрати картичка със завършената тренировка на приятели с едно докосване.',
+      'cal.eyebrow': 'Календар на тренировките',
+      'cal.title': 'Целият месец с един поглед',
+      'cal.lead': 'Всеки ден, в който тренираш, светва в календара. Поредните дни се сливат в една серия, така че виждаш ритъма си и пропуснатите дни.',
+      'cal.t1': '<strong>Серия и тренировки за месеца</strong>Поредните дни и тренировките този месец са най-отгоре.',
+      'cal.t2': '<strong>Дни с тренировка</strong>Лента показва в колко дни от месеца си тренирал.',
+      'cal.t3': '<strong>Броят се само истинските тренировки</strong>Ако прескочиш повече от половината серии, денят остава празен, така че календарът показва какво наистина си направил.',
+      'cal.t4': '<strong>Предишни месеци</strong>Прелисти назад и виж колко си напреднал.',
+      'cal.streak': 'Поредни дни',
+      'cal.thisMonth': 'Този месец',
+      'cal.month': 'Октомври',
+      'cal.mon': 'П',
+      'cal.tue': 'В',
+      'cal.wed': 'С',
+      'cal.thu': 'Ч',
+      'cal.fri': 'П',
+      'cal.sat': 'С',
+      'cal.sun': 'Н',
+      'cal.progress': '19 от 30 дни с тренировка',
+      'band.quote': 'Без абонамент. <em>Без работно време.</em>',
+      'band.body': 'Лостовете вече са там. „Лостове наблизо“ ти помага да ги намериш, а после и на следващия човек.',
+      'how.eyebrow': 'Как работи',
+      'how.title': 'От дивана до лоста в три стъпки',
+      's1.title': 'Отвори картата',
+      's1.body': 'Разреши локацията и най-близките места излизат първи. Локацията се използва само докато приложението е отворено.',
+      's2.title': 'Избери място',
+      's2.body': 'Виж уредите, състоянието им, снимките и отзивите, после вземи упътване.',
+      's3.title': 'Тренирай и печели',
+      's3.body': 'Натисни „Тренирай тук“, завърши тренировката и вземи XP. На излизане оцени мястото.',
+      'contact.eyebrow': 'Свържи се с нас',
+      'contact.title': 'Въпроси, идеи или място, което сме объркали?',
+      'contact.lead': 'Пиши ни. Отзивите на атлетите определят какво ще правим нататък. Можеш да ни пишеш и за личните си данни, а профила си можеш да изтриеш по всяко време от Настройки в приложението.',
+      'contact.email': 'Имейл',
+      'contact.copy': 'Копирай',
+      'contact.android': '„Лостове наблизо“ за Android',
+      'contact.dev': 'Разработчик',
+      'contact.devName': 'Живко Желев',
+      'footer.copy': '© 2026 Лостове наблизо · Създадено в България',
+      'contact.copied': 'Копирано',
+      'meta.title': 'Лостове наблизо',
+      'meta.description': 'Намери места за уличен фитнес около теб: лостове, успоредки, халки и още. Виж уредите и състоянието им, тренирай, печели XP и добавяй липсващи места.'
+    };
+
+    // The sample month: October, starting on a Thursday, today the 30th, a 9-day streak.
+    (function drawCalendar() {
+      var grid = document.getElementById('cal-grid');
+      var trained = [1, 2, 5, 6, 7, 9, 12, 13, 15, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30];
+      var firstWeekday = 3; // Monday = 0
+      var today = 30;
+      var html = '';
+      for (var blank = 0; blank < firstWeekday; blank++) html += '<div class="day"></div>';
+      for (var d = 1; d <= 31; d++) {
+        var col = (firstWeekday + d - 1) % 7;
+        var on = trained.indexOf(d) !== -1;
+        var left = on && col > 0 && trained.indexOf(d - 1) !== -1;
+        var right = on && col < 6 && trained.indexOf(d + 1) !== -1;
+        html += '<div class="day' + (on ? ' on' : '') + (d > today ? ' future' : '') + '">' +
+          (left ? '<i class="join l"></i>' : '') + (right ? '<i class="join r"></i>' : '') +
+          '<span' + (on ? ' class="grad"' : '') + '>' + d + '</span></div>';
+      }
+      grid.insertAdjacentHTML('beforeend', html);
+    })();
+
+    var nodes = document.querySelectorAll('[data-i18n]');
+    var description = document.querySelector('meta[name="description"]');
+    var select = document.getElementById('lang-select');
+
+    // English comes from the page itself, so it never drifts from the markup.
+    var EN = {
+      'contact.copied': 'Copied',
+      'meta.title': document.title,
+      'meta.description': description ? description.getAttribute('content') : ''
+    };
+    nodes.forEach(function (node) { EN[node.getAttribute('data-i18n')] = node.innerHTML; });
+
+    var TRANSLATIONS = { en: EN, bg: BG };
+    // Time zones whose visitors get a language before they pick one.
+    var ZONES = { 'Europe/Sofia': 'bg' };
+    var current = 'en';
+
+    function t(key) {
+      var text = TRANSLATIONS[current][key];
+      return text != null ? text : EN[key];
+    }
+
+    function apply(lang) {
+      current = TRANSLATIONS[lang] ? lang : 'en';
+      nodes.forEach(function (node) { node.innerHTML = t(node.getAttribute('data-i18n')); });
+      document.documentElement.lang = current;
+      document.title = t('meta.title');
+      if (description) description.setAttribute('content', t('meta.description'));
+      select.value = current;
+    }
+
+    // A saved choice wins; then the device's time zone; then the browser's languages.
+    function detect() {
+      try {
+        var saved = localStorage.getItem('lang');
+        if (saved && TRANSLATIONS[saved]) return saved;
+      } catch (e) {}
+      var zone = '';
+      try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+      if (ZONES[zone]) return ZONES[zone];
+      var languages = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+      for (var i = 0; i < languages.length; i++) {
+        var code = String(languages[i]).slice(0, 2).toLowerCase();
+        if (TRANSLATIONS[code]) return code;
+      }
+      return 'en';
+    }
+
+    apply(detect());
+
+    select.addEventListener('change', function () {
+      apply(select.value);
+      try { localStorage.setItem('lang', current); } catch (e) {}
+    });
+
+    var btn = document.getElementById('copy-email');
+    var email = document.getElementById('email');
+    btn.addEventListener('click', function () {
+      function done() {
+        btn.textContent = t('contact.copied');
+        setTimeout(function () { btn.textContent = t('contact.copy'); }, 1600);
+      }
+      function select() {
+        var range = document.createRange();
+        range.selectNodeContents(email);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email.textContent).then(done, select);
+      } else {
+        select();
+      }
+    });
+  })();
+</script>
+</html>
